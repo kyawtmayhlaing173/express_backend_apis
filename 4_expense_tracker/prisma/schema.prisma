@@ -16,8 +16,17 @@ datasource db {
 model Expense {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   description String
-  amount      String
-  notes       String
-  category    String
+  amount      Float
+  notes       String?
+  category    Category
   createdAt   DateTime @default(now())
+}
+
+enum Category {
+  Leisure
+  Electronics
+  Utilities
+  Clothing
+  Health
+  Others
 }

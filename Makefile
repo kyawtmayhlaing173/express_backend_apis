@@ -12,3 +12,6 @@ prisma_studio:
 
 prisma_migrate_reset:
 	npx prisma migrate reset
+
+prisma_mongodb_push:
+	npx prisma db push
