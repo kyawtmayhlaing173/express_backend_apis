@@ -10,6 +10,17 @@ router.post("/", async (req, res) => {
     if (!email || !password) {
         return res.status(400).json({ msg: "email and password required"});
     }
+    const existingUser = await prisma.user.findUnique({
+        where: { email },
+    });
+
+    if (existingUser) {
+        if (await bcrypt.compare(password, user.password)) {
+            const token = generateToken(user);
+            return res.json({ token, user });
+        }
+    }
+    
     const hash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
         data: { email, password: hash },

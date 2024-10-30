@@ -1,6 +1,7 @@
 import { PrismaClient, Category } from "@prisma/client";
 import express from "express";
-import { auth } from "../middlewares/auth";
+import { auth, isOwner } from "../middlewares/auth";
+import { getDateRange } from "../middlewares/dateTime";
 
 const prisma = new PrismaClient();
 const app = express();
@@ -8,6 +9,20 @@ const app = express();
 app.get("/expenses", auth, async (req, res) => {
     try {
         const user = res.locals.user;
+        const { category } = req.body;
+        const { startDate, endDate, filter } = req.query;
+
+        const startDateString = typeof startDate === 'string' ? startDate : undefined;
+        const endDateString = typeof endDate === 'string' ? endDate : undefined;
+        const filterString = typeof filter === 'string' ? filter : undefined;
+
+        let filterStartDate, filterEndDate;
+        try {
+            ({ filterStartDate, filterEndDate } = getDateRange(filterString, startDateString, endDateString));
+        } catch (error) {
+            return res.status(400).send({ error: (error as Error).message });
+        }
+
         const data = await prisma.expense.findMany({
             include: { user: true },
             orderBy: { id: "desc" },
@@ -15,7 +30,9 @@ app.get("/expenses", auth, async (req, res) => {
             where: {
                 user: {
                     id: user.id
-                }
+                },
+                ...(category && { category: category }),
+                createdAt: { gte: filterStartDate, lte: filterEndDate }
             }
         });
         res.json(data);
@@ -35,14 +52,54 @@ app.post("/expense", auth, async (req, res) => {
     try {
         const user = res.locals.user;
 
-        const expense = await prisma.expense.create({
+        await prisma.expense.create({
             data: { description, amount, notes, category, userId: user.id }
         });
 
-        res.json(expense);
+        res.status(200).json({ message: "Successfully updated the task" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: error });
+    }
+});
+
+app.put("/expense/:id", auth, isOwner(), async (req, res) => {
+    const { description, amount, category } = req.body;
+    const { id } = req.params;
+
+    try {
+        await prisma.expense.updateMany({
+            where: { id: id },
+            data: {
+                description, amount, category
+            }
+        });
+        const expense = await prisma.expense.findUnique({
+            where: { id: id },
+            include: { user: true }
+        })
+        res.json(expense);
+    } catch (error) {
+        res.status(500).json({ error: error });
+    }
+});
+
+app.delete("/expense/:id", auth, isOwner(), async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+        const expense = await prisma.expense.findUnique({
+            where: { id: id },
+        });
+        if (!expense) {
+            return res.status(404).json({ error: "Expense not found" })
+        }
+        await prisma.expense.delete({
+            where: { id: id }
+        });
+        res.json({ message: "Expense is successfully deleted" });
+    } catch (e) {
+        res.status(500).json({ error: e });
     }
 });
 

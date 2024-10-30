@@ -9,10 +9,17 @@ router.use(express.json());
 
 router.post("/signup", async (req, res) => {
   const { email, password } = req.body;
-  console.log('Email', email);
   
   if (!email || !password) {
-    return res.status(400).json({ msg: "email and password required" });
+    return res.status(400).json({ msg: "Email and Password required" });
+  }
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email: email }
+  });
+
+  if (existingUser) {
+    return res.status(400).json({ err: "An account with this email already exists" })
   }
 
   const hash = await bcrypt.hash(password, 10);
@@ -27,7 +34,7 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ msg: "email and password required" });
+        return res.status(400).json({ msg: "Email and Password required" });
     }
 
     const user = await prisma.user.findUnique({
@@ -40,7 +47,7 @@ router.post("/login", async (req, res) => {
             return res.json({ token, user });
         }
     }
-    res.status(401).json({ msg: "incorrect email and password" });
+    res.status(401).json({ msg: "Incorrect Email and Password" });
 });
 
 export const userRouter = router;
