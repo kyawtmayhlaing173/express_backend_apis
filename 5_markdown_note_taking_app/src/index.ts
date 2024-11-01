@@ -1,28 +1,51 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import multer from 'multer';
+import { marked } from "marked";
+import * as fs from 'fs';
+import path from "path";
 
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
-const upload = multer({ dest: 'uploads/' })
+const upload = multer({
+  dest: 'uploads/', fileFilter: (req: Request, file: Express.Multer.File, callback: any) => {
+    console.log(file.mimetype, file.filename, file.originalname);
+    if (file.mimetype === 'text/markdown') {
+      callback(null, true);
+    } else {
+      callback(null, false);
+      return callback(new Error('Only .md format allowed!'));
+    }
+  }
+})
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
-});
-
-app.post("/upload_files", upload.array("files"), uploadFiles);
+app.post("/upload_files", upload.single('markdown'), uploadFiles);
 
 function uploadFiles(req: Request, res: Response) {
-  console.log(req.body);
-  console.log(req.files);
+  console.log(req.file);
   res.json({ message: "Successfully uploaded files" });
 }
+
+app.get("/markdown", async (req, res) => {
+  try {
+    const data = await fs.promises.readFile('./uploads/c8a470704fe125dd63f0d601f9215f92', 'utf8');
+    const htmlContent = await marked.parse(data, {
+      gfm: true,
+      breaks: true,
+    });
+    res.set('Content-Type', 'text/html');
+    res.send(Buffer.from(htmlContent));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to read file' });
+  }
+});
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
