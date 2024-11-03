@@ -4,6 +4,7 @@ import multer from 'multer';
 import { marked } from "marked";
 import * as fs from 'fs';
 import path from "path";
+import OpenAI from 'openai';
 
 dotenv.config();
 
@@ -32,6 +33,17 @@ function uploadFiles(req: Request, res: Response) {
   res.json({ message: "Successfully uploaded files" });
 }
 
+async function checkGrammar(req: Request, res: Response) {
+  const client = new OpenAI({
+    apiKey: process.env['OPENAI_API_KEY'],
+  });
+  const chatCompletion = await client.chat.completions.create({
+    messages: [{ role: 'user', content: 'Say this is a test' }],
+    model: 'gpt-3.5-turbo',
+  });
+  res.json({ chatCompletion });
+}
+
 app.get("/markdown", async (req, res) => {
   try {
     const data = await fs.promises.readFile('./uploads/c8a470704fe125dd63f0d601f9215f92', 'utf8');
@@ -46,6 +58,8 @@ app.get("/markdown", async (req, res) => {
     res.status(500).json({ error: 'Failed to read file' });
   }
 });
+
+app.get("/check-grammar", checkGrammar);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
