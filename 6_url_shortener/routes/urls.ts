@@ -1,14 +1,14 @@
-import express from 'express';
+import express, { Express, Request, Response, Router } from "express";
 import { nanoid } from 'nanoid';
-import Url from '../models/Url.js';
-import { validateUrl } from '../utils/utils.js';
+import Url from '../models/Url';
+import { validateUrl } from '../utils/utils';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const router = express.Router();
-
-router.post('/short', async (req, res) => {
+const defaultRoute =  Router();
+  
+defaultRoute.post('/short', async (req, res): Promise<any> => {
     const { origUrl } = req.body;
     const base = process.env.BASE;
 
@@ -34,4 +34,4 @@ router.post('/short', async (req, res) => {
     }
 });
 
-export default router;
+export default defaultRoute;
