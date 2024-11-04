@@ -44,6 +44,16 @@ h1 {
 }
 
 #messageInput {
+    flex: 2;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+#nameInput {
     flex: 1;
     padding: 12px 16px;
     border: 2px solid #ddd;
@@ -53,12 +63,12 @@ h1 {
     transition: border-color 0.2s ease;
 }
 
-#messageInput:focus {
+#messageInput:focus, #nameInput:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-#messageInput::placeholder {
+#messageInput::placeholder, #nameInput::placeholder {
     color: #aaa;
 }
 

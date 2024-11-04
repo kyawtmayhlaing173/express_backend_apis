@@ -8,12 +8,12 @@ const wss = new WebSocket.Server({ port: 8080 });
 wss.on('connection', (ws) => {
     console.log('A new client connected');
 
-    ws.on('message', (message) => {
-        console.log('Received message:', message.toString());
+    ws.on('message', (name, message) => {
+        console.log('Received message:', name.toString(), message.toString());
     
         wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(message.toString());
+                client.send(String(client));
             }
         })
     });
