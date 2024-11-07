@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { prismaClient } from "../prisma";
+import { prisma } from "../prisma";
 import { generateToken } from "../jwtUtils";
 
 const router = express.Router();
@@ -13,7 +13,7 @@ router.post("/signup", async (req: Request, res: Response) => {
     }
 
     try {
-        const existingUser = await prismaClient.user.findUnique({
+        const existingUser = await prisma.user.findUnique({
             where: { email: email }
         });
 
@@ -22,7 +22,7 @@ router.post("/signup", async (req: Request, res: Response) => {
         }
 
         const hash = await bcrypt.hash(password, 10);
-        const user = await prismaClient.user.create({
+        const user = await prisma.user.create({
             data: { email, password: hash, name },
         });
 
@@ -41,7 +41,7 @@ router.post("/login", async (req: Request, res: Response) => {
             res.status(400).json({ msg: "Email and password are required" });
         }
 
-        const user = await prismaClient.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { email: email }
         });
         console.log(`User ${user?.password}`);
