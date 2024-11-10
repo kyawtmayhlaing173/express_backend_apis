@@ -10,6 +10,7 @@ export const verifyToken = (token: string): object | string => {
     return jwt.verify(token, JWT_SECRET);
 }
 
-export const decode = (token: string): string | null | JwtPayload => {
+export const decode = (token: string | undefined): string | null | JwtPayload => {
+    if (!token) return null;
     return jwt.decode(token);
 }

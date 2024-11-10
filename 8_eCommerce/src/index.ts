@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import userRouter from '../routers/user';
 import productRouter from '../routers/product';
+import cartRouter from '../routers/cart';
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/user", userRouter);
 app.use("/", productRouter);
+app.use("/cart", cartRouter);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running at http://localhost:${port}`);
