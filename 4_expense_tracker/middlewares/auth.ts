@@ -25,7 +25,7 @@ export function isOwner() {
         const { id } = req.params;
         const user = res.locals.user;
 
-        const expense = await prisma.expense.findUnique({
+        const expense = await prisma.expense.findFirst({
             where: { id: id },
             include: { user: true },
         });

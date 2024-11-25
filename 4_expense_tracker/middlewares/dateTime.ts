@@ -26,6 +26,7 @@ export function getDateRange(timeFilter: string | undefined, startDate: string |
             }
             filterStartDate = new Date(startDate);
             filterEndDate = new Date(endDate);
+            console.log(`Filter Start Date ${filterStartDate}, Filter End Date ${filterEndDate}`)
             break;
         default:
             filterStartDate = dayjs().subtract(10, "year").toDate();

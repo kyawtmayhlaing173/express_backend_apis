@@ -32,7 +32,6 @@ router.post('/', auth, async (req: Request, res: Response) => {
             res.status(400).json({ msg: "Items are required" });
         }
 
-
         // Check if the user already has a cart
         let cart = await cartService.findCartByUserId(user.id);
 
@@ -72,11 +71,8 @@ router.delete('/', auth, async (req: Request, res: Response) => {
     try {
         const { id } = req.body;
         const user = res.locals.user;
-        console.log(`User id is ${user.id}`);
 
-        const shoppingCart = await prisma.cart.findFirst({
-            where: { userId: user.id },
-        });
+        const shoppingCart = await cartService.findCartByUserId(user.id);
 
         if (!shoppingCart) {
             res.status(400).json({ msg: "Cart not found!" });

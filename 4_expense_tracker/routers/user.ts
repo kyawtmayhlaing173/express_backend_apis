@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 import { prisma } from "../prisma";
 import { generateToken, verifyToken } from "../jwtUtils";
+import { auth } from "../middlewares/auth";
 
 const router = express.Router();
 router.use(express.json());
@@ -19,7 +20,7 @@ router.post("/signup", async (req, res) => {
   });
 
   if (existingUser) {
-    return res.status(400).json({ err: "An account with this email already exists" })
+    return res.status(400).json({ msg: "An account with this email already exists" })
   }
 
   const hash = await bcrypt.hash(password, 10);
@@ -48,6 +49,11 @@ router.post("/login", async (req, res) => {
         }
     }
     res.status(401).json({ msg: "Incorrect Email and Password" });
+});
+
+router.get("/verify", auth, async (req, res) => {
+  const user = res.locals.user;
+  return res.json(user);
 });
 
 export const userRouter = router;

@@ -63,15 +63,15 @@ app.post("/expense", auth, async (req, res) => {
     }
 });
 
-app.put("/expense/:id", auth, isOwner(), async (req, res) => {
-    const { description, amount, category } = req.body;
+app.put("/expense/:id", auth, async (req, res) => {
+    const { description, amount, category, notes } = req.body;
     const { id } = req.params;
 
     try {
         await prisma.expense.updateMany({
             where: { id: id },
             data: {
-                description, amount, category
+                description, amount, category, notes,
             }
         });
         const expense = await prisma.expense.findUnique({
