@@ -14,10 +14,68 @@ datasource db {
 }
 
 model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  email String @unique
-  password String
-  username String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  password  String
+  username  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  workouts  Workout[]
+
+  @@map("user")
+}
+
+model Workout {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  status    WorkoutStatus
+  notes     String
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @default(now())
+  userId    String            @db.ObjectId
+  user      User              @relation(fields: [userId], references: [id])
+  workouts  WorkoutExercise[]
+
+  @@map("workout")
+}
+
+model Exercise {
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  muscleGroup String
+  difficulty  DifficultyLevel   @default(BEGINNER)
+  workouts    WorkoutExercise[]
+
+  @@map("exercise")
+}
+
+model WorkoutExercise {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  exerciseId String   @db.ObjectId
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  workoutId  String   @db.ObjectId
+  workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  sets       Int
+  reps       Int
+  completed  Boolean  @default(false)
+  duration   Int?
+
+  @@unique([workoutId, exerciseId])
+  @@map("workout_exercises")
+
+}
+
+enum WorkoutStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
 }
